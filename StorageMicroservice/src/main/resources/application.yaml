@@ -1,0 +1,22 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    serviceRoutings:
+      - invoice.rpc->BookItemsService.execute.*->BookItemsServiceExecutionQueue
+    compensationRoutings:
+      - invoice.rpc->BookItemsService.compensation.*->BookItemsServiceCompensationQueue
+    eventRoutings:
+      - invoice.pub->BookItemsService.execute.*->BookItemsEventExecutionQueue
+      - invoice.rpc->BookItemsService.compensation.*->BookItemsServiceCompensationQueue
+  datasource:
+    url: jdbc:postgresql://[::1]:5740/storage
+    driver-class-name: org.postgresql.Driver
+    username: storage
+    password: storage
+
+logging:
+  level:
+    io.saga: TRACE

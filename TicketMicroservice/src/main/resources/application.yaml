@@ -1,0 +1,22 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    serviceRoutings:
+      - invoice.rpc->TicketGenerationService.execute.*->TicketGenerationServiceExecutionQueue
+    compensationRoutings:
+      - invoice.rpc->TicketGenerationService.compensation.*->TicketGenerationServiceCompensationQueue
+    eventRoutings:
+      - invoice.pub->TicketGenerationService.execute.*->TicketGenerationEventExecutionQueue
+      - invoice.pub->TicketGenerationService.compensation.*->TicketGenerationEventCompensationQueue
+  datasource:
+    url: jdbc:postgresql://[::1]:5740/ticket
+    driver-class-name: org.postgresql.Driver
+    username: ticket
+    password: ticket
+
+logging:
+  level:
+    io.saga: TRACE

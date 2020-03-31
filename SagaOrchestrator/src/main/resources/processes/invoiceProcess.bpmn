@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_149jn2g" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
+  <bpmn:process id="invoiceProcess" name="Invoice Process" isExecutable="true" camunda:versionTag="1.0" camunda:historyTimeToLive="100">
+    <bpmn:serviceTask id="Activity_Create_Invoice" name="Create Invoice" camunda:delegateExpression="${createInvoiceActivity}">
+      <bpmn:incoming>Flow_173gwms</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zw96pf</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="Event_0vrji1f" name="Create Error Invoice" attachedToRef="Activity_Create_Invoice">
+      <bpmn:outgoing>Flow_09dmdem</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0upnl6v" errorRef="Error_1uhknuk" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_173gwms" sourceRef="StartEvent_Invoice" targetRef="Activity_Create_Invoice" />
+    <bpmn:startEvent id="StartEvent_Invoice" name="Start Process" camunda:initiator="instantiationMessage">
+      <bpmn:outgoing>Flow_173gwms</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0zw96pf" sourceRef="Activity_Create_Invoice" targetRef="Activity_Book_Itens" />
+    <bpmn:serviceTask id="Activity_Book_Itens" name="Book Itens" camunda:delegateExpression="${bookInvoiceItemsActivity}">
+      <bpmn:incoming>Flow_0zw96pf</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ndgfbq</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="Event_063xui2" attachedToRef="Activity_Book_Itens">
+      <bpmn:outgoing>Flow_1fjqsq5</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0yg4a4d" errorRef="Error_1uhknuk" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_0ndgfbq" sourceRef="Activity_Book_Itens" targetRef="Activity_Pay_Invoice" />
+    <bpmn:serviceTask id="Activity_Pay_Invoice" name="Pay Invoice " camunda:delegateExpression="${payInvoiceActivity}">
+      <bpmn:incoming>Flow_0ndgfbq</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ultlvz</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0ultlvz" sourceRef="Activity_Pay_Invoice" targetRef="Activity_Ticket_Generation" />
+    <bpmn:sequenceFlow id="Flow_0xlw3aa" sourceRef="Activity_Ticket_Generation" targetRef="Event_Sucess_End_Invoice" />
+    <bpmn:serviceTask id="Activity_Ticket_Generation" name="Ticket Generation" camunda:delegateExpression="${ticketGenerationActivity}">
+      <bpmn:incoming>Flow_0ultlvz</bpmn:incoming>
+      <bpmn:outgoing>Flow_0xlw3aa</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="Event_05fnfv4" attachedToRef="Activity_Pay_Invoice">
+      <bpmn:outgoing>Flow_0kh6zji</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1k92inv" errorRef="Error_1uhknuk" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="Event_081wjpe" attachedToRef="Activity_Ticket_Generation">
+      <bpmn:outgoing>Flow_0hprd99</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1o6lmws" errorRef="Error_1uhknuk" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_09dmdem" sourceRef="Event_0vrji1f" targetRef="Activity_09bb0bj" />
+    <bpmn:sequenceFlow id="Flow_1fjqsq5" sourceRef="Event_063xui2" targetRef="Activity_09bb0bj" />
+    <bpmn:sequenceFlow id="Flow_0kh6zji" sourceRef="Event_05fnfv4" targetRef="Activity_09bb0bj" />
+    <bpmn:sequenceFlow id="Flow_0hprd99" sourceRef="Event_081wjpe" targetRef="Activity_09bb0bj" />
+    <bpmn:endEvent id="Event_Sucess_End_Invoice" name="Sucess Process End">
+      <bpmn:incoming>Flow_0xlw3aa</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_1x3xd7p" />
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0pocp2y" sourceRef="Activity_09bb0bj" targetRef="Event_0v43lf2" />
+    <bpmn:endEvent id="Event_0v43lf2" name="Error End">
+      <bpmn:incoming>Flow_0pocp2y</bpmn:incoming>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0u3c72z" errorRef="Error_1uhknuk" />
+    </bpmn:endEvent>
+    <bpmn:callActivity id="Activity_09bb0bj" name="Compensation Flow" calledElement="InvoiceCompensationFlow">
+      <bpmn:extensionElements>
+        <camunda:in source="invoicePlaced" target="invoicePlaced" />
+        <camunda:in source="itemsBooked" target="itemsBooked" />
+        <camunda:in source="paymentExecuted" target="paymentExecuted" />
+        <camunda:in source="ticketGenerated" target="ticketGenerated" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0hprd99</bpmn:incoming>
+      <bpmn:incoming>Flow_0kh6zji</bpmn:incoming>
+      <bpmn:incoming>Flow_1fjqsq5</bpmn:incoming>
+      <bpmn:incoming>Flow_09dmdem</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pocp2y</bpmn:outgoing>
+    </bpmn:callActivity>
+  </bpmn:process>
+  <bpmn:error id="Error_1uhknuk" name="sc_error" errorCode="SC_ERROR" />
+  <bpmn:message id="Message_02bdxey" name="StartMessage" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="invoiceProcess">
+      <bpmndi:BPMNEdge id="Flow_0pocp2y_di" bpmnElement="Flow_0pocp2y">
+        <di:waypoint x="740" y="440" />
+        <di:waypoint x="740" y="502" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hprd99_di" bpmnElement="Flow_0hprd99">
+        <di:waypoint x="1140" y="175" />
+        <di:waypoint x="1140" y="390" />
+        <di:waypoint x="790" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kh6zji_di" bpmnElement="Flow_0kh6zji">
+        <di:waypoint x="900" y="175" />
+        <di:waypoint x="900" y="390" />
+        <di:waypoint x="790" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fjqsq5_di" bpmnElement="Flow_1fjqsq5">
+        <di:waypoint x="660" y="175" />
+        <di:waypoint x="660" y="390" />
+        <di:waypoint x="690" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09dmdem_di" bpmnElement="Flow_09dmdem">
+        <di:waypoint x="420" y="175" />
+        <di:waypoint x="420" y="390" />
+        <di:waypoint x="690" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xlw3aa_di" bpmnElement="Flow_0xlw3aa">
+        <di:waypoint x="1140" y="117" />
+        <di:waypoint x="1242" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ultlvz_di" bpmnElement="Flow_0ultlvz">
+        <di:waypoint x="900" y="117" />
+        <di:waypoint x="1040" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ndgfbq_di" bpmnElement="Flow_0ndgfbq">
+        <di:waypoint x="660" y="117" />
+        <di:waypoint x="800" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zw96pf_di" bpmnElement="Flow_0zw96pf">
+        <di:waypoint x="420" y="117" />
+        <di:waypoint x="560" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_173gwms_di" bpmnElement="Flow_173gwms">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="320" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0xycpwa_di" bpmnElement="Activity_Create_Invoice">
+        <dc:Bounds x="320" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1y77tsv_di" bpmnElement="StartEvent_Invoice">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="164" y="142" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1siiao7_di" bpmnElement="Activity_Book_Itens">
+        <dc:Bounds x="560" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1jc6nnx_di" bpmnElement="Activity_Pay_Invoice">
+        <dc:Bounds x="800" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_02vdccf_di" bpmnElement="Activity_Ticket_Generation">
+        <dc:Bounds x="1040" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0o3yoos_di" bpmnElement="Activity_09bb0bj">
+        <dc:Bounds x="690" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0dblhk9_di" bpmnElement="Event_Sucess_End_Invoice">
+        <dc:Bounds x="1242" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1221" y="142" width="80" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0cmtizq_di" bpmnElement="Event_0v43lf2">
+        <dc:Bounds x="722" y="502" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="718" y="545" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1krxxgk_di" bpmnElement="Event_081wjpe">
+        <dc:Bounds x="1122" y="139" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1abu477_di" bpmnElement="Event_05fnfv4">
+        <dc:Bounds x="882" y="139" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0d9tkhw_di" bpmnElement="Event_063xui2">
+        <dc:Bounds x="642" y="139" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0vrji1f_di" bpmnElement="Event_0vrji1f">
+        <dc:Bounds x="402" y="139" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="429" y="176" width="62" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

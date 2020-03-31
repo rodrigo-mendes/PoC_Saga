@@ -1,0 +1,10 @@
+# Project exclude paths
+/.gradle/
+/ConsumerAdapter/target/
+/InvoiceMicroservice/target/
+/Model/target/
+/PaymentsMicroservice/target/
+/ProducerAdapter/target/
+/SagaOrchestrator/target/
+/StorageMicroservice/target/
+/TicketMicroservice/target/

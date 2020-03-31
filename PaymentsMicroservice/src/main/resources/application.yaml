@@ -1,0 +1,22 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    serviceRoutings:
+      - invoice.rpc->PayInvoiceService.execute.*->PayInvoiceServiceExecutionQueue
+    compensationRoutings:
+      - invoice.rpc->PayInvoiceService.compensation.*->PayInvoiceServiceCompensationQueue
+    eventRoutings:
+      - invoice.pub->PayInvoiceService.execute.*->PayInvoiceEventExecutionQueue
+      - invoice.pub->PayInvoiceService.compensation.*->PayInvoiceEventCompensationQueue
+  datasource:
+    url: jdbc:postgresql://[::1]:5740/payment
+    driver-class-name: org.postgresql.Driver
+    username: payment
+    password: payment
+
+logging:
+  level:
+    io.saga: TRACE

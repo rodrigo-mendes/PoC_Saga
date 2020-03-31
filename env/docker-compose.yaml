@@ -1,0 +1,27 @@
+version: '2.0'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: "rabbitmq"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    labels:
+      NAME: "rabbitmq"
+
+  database:
+    image: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: database
+#    volumes:
+#      - database-data:/temp/postgresql/data/ # persist data even if container shuts down
+#  volumes:
+#    database-data: # named volumes can be managed easier using docker-compose
+    labels:
+      NAME: "postgres"
